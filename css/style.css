@@ -1,2 +1,2 @@
-h1{color:red}
+*{box-sizing:border-box}#grid{height:600px;width:300px;margin:0 auto;display:flex;flex-wrap:wrap}#grid>div{border:2px solid grey;width:30px;height:30px}#grid>div.form{background-color:grey}
 /*# sourceMappingURL=style.css.map */
