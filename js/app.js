@@ -2,9 +2,11 @@ const gridWidth = 10
 const gridHeight = 20
 const delay = 1000
 let gridCollection
-let shape
+let shape = [15,4,5,16]
 let fallTimerId
 const gridFilling = []
+const matrixRotationPositive = [0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0, 0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33]
+const matrixRotationNegative = [0, 9, 18, 27, 0, 0, 0, 0, -29, -20, -11, -2, 7, 0, 0, 0, 0, 0, 0, -31, -22, -13, 0, 0, 0, 0, 0, 0, 0, 0, -33]
 
 function updateGrid(){
   shape.forEach(element => {
@@ -16,12 +18,10 @@ function updateGrid(){
     //Fill gridFilling with the position of the shape
     gridFilling[20 - Math.floor(element/gridWidth) - 1].push(element)
   })
-  console.log(gridFilling);
   //Is there a line completed ? Remove the line from the Array
   for(let i = 0; i < gridFilling.length; i++){
     if(gridFilling[i].length === 10){
       gridFilling.splice(i,1)
-      console.log(gridFilling);
       //Add gridWidth to the position above the deleted to move them down
       for(let j = i; j < gridFilling.length; j++){
         gridFilling[j].forEach((element, index) => gridFilling[j][index] = element + gridWidth)
@@ -31,10 +31,27 @@ function updateGrid(){
   }
   //Reset the all gridCollection
   gridCollection.forEach(element => element.classList.remove('shape'))
-  //Redraw the entire gridCollection
+  //Redraw the entire gridCollection based on the gridFilling array
   gridFilling.forEach(element => {
     element.forEach(element => gridCollection[element].classList.add('shape'))
   })
+}
+function rotate(){
+  shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
+
+  for(let k = 1; k < shape.length; k++){
+    console.log(shape);
+    console.log(shape[0] - (shape[0] - shape[k]))
+    const distance = shape[0] - shape[k]
+    if(distance >= 0){
+      shape[k] += matrixRotationPositive[distance]
+    } else {
+      shape[k] -= matrixRotationNegative[- distance]
+    }
+  }
+  console.log(shape);
+  shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
+
 }
 
 function nextShape(){
@@ -43,7 +60,7 @@ function nextShape(){
   if(shape.includes(4)){
     alert('you lost')
   } else {
-    shape = [4,5,14,15] //Square shape
+    shape = [15,4,5,16] //Square shape
     shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
     fall()
   }
@@ -112,13 +129,16 @@ function init(){
   //Create initial grid
   createGrid()
   //Display the first shape at the top of the grid
-  shape = [4,5,14,15] //Square shape
+  shape = [15,4,5,16] //Square shape
   shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
   fall()
 }
 
 function handleKeydown(e){
   switch(e.keyCode) {
+    case 32:
+      rotate()
+      break
     case 37:
       move('left')
       break
