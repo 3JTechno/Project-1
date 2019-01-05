@@ -1,41 +1,102 @@
 const gridWidth = 10
 const gridHeight = 20
 const delay = 1000
-let fallTimerId
-const form = [4,5,14,15] //Square form
 let gridCollection
+let shape
+let fallTimerId
+const gridFilling = []
 
-function stopForm(){
-  clearInterval(fallTimerId)
+function updateGrid(){
+  shape.forEach(element => {
+    //Add each element of the shape to the corresponding row of the grid (0 bottom to 19 top)
+    //Add a line in gridFilling if it doesn't exist yet
+    while(20 - Math.floor(element / gridWidth) > gridFilling.length){
+      const newLine = []
+      gridFilling.push(newLine)
+    }
+    gridFilling[20 - Math.floor(element/gridWidth) - 1].push(element)
+  })
+  console.log(gridFilling);
+}
+
+function nextShape(){
+  updateGrid()
+  //Loose condition, just to avoid memory leak
+  if(shape.includes(4)){
+    alert('you lost')
+  } else {
+    shape = [4,5,14,15] //Square shape
+    shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
+    fall()
+  }
+}
+
+function checkIfMovePossible(direction){
+  let movePossible = true
+  //Check if movement is possible
+  shape.forEach(element => {
+    const nextIndex = getNextPosition(direction, element)
+    if(element % gridWidth === 0 && direction === 'left' ||
+    element % gridWidth === gridWidth - 1 && direction === 'right' ||
+    element + gridWidth >= (gridHeight * gridWidth) && direction ==='down'||
+    //Verify that the next position doesn't contain a 'shape' class and is not itself
+    (gridCollection[nextIndex].classList.contains('shape') && !shape.includes(nextIndex))
+    ) movePossible = false
+  })
+  return movePossible
+}
+
+function getNextPosition(direction, element){
+  switch(direction){
+    case 'left':
+      return element - 1
+    case 'right':
+      return element + 1
+    case 'down':
+      return element + gridWidth
+  }
 }
 
 function move(direction){
-  let movePossible = true
-  //Check if movement is possible
-  form.forEach(element => {
-    if(element % gridWidth === 0 && direction === 'left' ||
-      element % gridWidth === gridWidth - 1 && direction === 'right' ||
-      element + gridWidth >= (gridHeight * gridWidth) && direction ==='down'
-    ){
-      movePossible = false
-    }
-  })
-  if(movePossible){
-    form.forEach(element => gridCollection[element].classList.toggle('form'))
-    form.forEach((element,index) => {
-      switch(direction){
-        case 'left':
-          form[index] = element - 1
-          break
-        case 'right':
-          form[index] = element + 1
-          break
-        case 'down':
-          form[index] = element + gridWidth
-      }
+  //Change the position of the shape and update the grid
+  if(checkIfMovePossible(direction)){
+    shape.forEach(element => gridCollection[element].classList.toggle('shape'))
+    shape.forEach((element,index) => {
+      shape[index] = getNextPosition(direction, element)
     })
-    form.forEach(element => gridCollection[element].classList.toggle('form'))
+    shape.forEach(element => gridCollection[element].classList.toggle('shape'))
+    return true
+  } else {
+    return false
   }
+}
+
+function fall(){
+  //Move shape down a line
+  const continueFall = move('down')
+  //Stop the time if shape cannot move down anymore
+  if(!continueFall) return nextShape()
+  //Relauch the fall function every "delay" ms
+  fallTimerId = setTimeout(fall, delay)
+}
+
+function createGrid(){
+  //Creation of the initial grid with divs
+  const gridFrame = document.getElementById('grid')
+  for(let i = 0; i < gridWidth * gridHeight; i++){
+    const cell = document.createElement('div')
+    gridFrame.appendChild(cell)
+  }
+  gridCollection = Array.from(document.querySelectorAll('#grid div'))
+}
+
+function init(){
+  //Create initial grid
+  createGrid()
+  //Display the first shape at the top of the grid
+  shape = [4,5,14,15] //Square shape
+  shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
+  fall()
 }
 
 function handleKeydown(e){
@@ -50,41 +111,6 @@ function handleKeydown(e){
       move('down')
       break
   }
-}
-
-function fall(){
-  let continueFall = true
-  //Hide the current form
-  form.forEach(element => gridCollection[element].classList.toggle('form'))
-  //Change the form position to reflect the fall down by a line
-  form.forEach((element, index) => {
-    form[index] = element + gridWidth
-  })
-  //Redraw the element once fall by one line
-  form.forEach(element => gridCollection[element].classList.toggle('form'))
-  //Check if form has reached the bottom
-  form.forEach(element => {
-    if(element + gridWidth >= gridHeight * gridWidth){
-      continueFall = false
-    }
-  })
-  if(!continueFall) return stopForm()
-  //Relauch the fall function every "delay" ms
-  fallTimerId = setTimeout(fall, delay)
-}
-
-function init(){
-  //Creation of the initial grid with divs
-  const gridFrame = document.getElementById('grid')
-  for(let i = 0; i < gridWidth * gridHeight; i++){
-    const cell = document.createElement('div')
-    gridFrame.appendChild(cell)
-  }
-  //Display the first form at the top of the grid
-  gridCollection = Array.from(document.querySelectorAll('#grid div'))
-  form.forEach(formIndex => gridCollection[formIndex].classList.toggle('form'))
-
-  fall()
 }
 
 document.addEventListener('keydown', handleKeydown)
