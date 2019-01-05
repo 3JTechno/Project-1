@@ -8,15 +8,33 @@ const gridFilling = []
 
 function updateGrid(){
   shape.forEach(element => {
-    //Add each element of the shape to the corresponding row of the grid (0 bottom to 19 top)
-    //Add a line in gridFilling if it doesn't exist yet
+    //Add a line in gridFilling if it doesn't exist yet (0 bottom to 19 top)
     while(20 - Math.floor(element / gridWidth) > gridFilling.length){
       const newLine = []
       gridFilling.push(newLine)
     }
+    //Fill gridFilling with the position of the shape
     gridFilling[20 - Math.floor(element/gridWidth) - 1].push(element)
   })
   console.log(gridFilling);
+  //Is there a line completed ? Remove the line from the Array
+  for(let i = 0; i < gridFilling.length; i++){
+    if(gridFilling[i].length === 10){
+      gridFilling.splice(i,1)
+      console.log(gridFilling);
+      //Add gridWidth to the position above the deleted to move them down
+      for(let j = i; j < gridFilling.length; j++){
+        gridFilling[j].forEach((element, index) => gridFilling[j][index] = element + gridWidth)
+      }
+      i--
+    }
+  }
+  //Reset the all gridCollection
+  gridCollection.forEach(element => element.classList.remove('shape'))
+  //Redraw the entire gridCollection
+  gridFilling.forEach(element => {
+    element.forEach(element => gridCollection[element].classList.add('shape'))
+  })
 }
 
 function nextShape(){
