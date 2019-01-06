@@ -3,14 +3,14 @@ const gridHeight = 20
 const delay = 1000
 let gridCollection
 let fallTimerId
-const gridFilling = []
-const matrixRotation = [0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0, 0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33]
-const shapesList = [[14,4,5,15], [4,3,5,6], [4,5,6,14], [6,4,5,16], [5,4,6,15], [15,5,6,14], [16,5,6, 17]]
+const matrixOfRotation = [0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0, 0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33]
+const shapesList = [['cube', 'green',[14,4,5,15]], ['bar', 'red', [4,3,5,6]], ['L', 'black', [4,5,6,14]], ['inverted-L', 'saumon', [6,4,5,16]], ['T', 'mauve', [5,4,6,15]], ['S', 'orange', [15,5,6,14]],['inverted-S', 'blue', [16,5,6, 17]]]
 let shape
 let grid
 
 class Grid{
   constructor(){
+    this.filling = []
     this.init()
   }
 
@@ -23,18 +23,59 @@ class Grid{
     }
     gridCollection = Array.from(document.querySelectorAll('#grid div'))
   }
+  contains(nextIndex){
+    //Concat all the line of the grid object and search if nextIndex is present
+    const concatGrid = grid.filling.reduce((acc, element) => acc.concat(element),[])
+    return concatGrid.includes(nextIndex)
+  }
+  addShapeToGrid(){
+    shape.position.forEach(element => {
+      //Add a line in grid.filling if it doesn't exist yet (0 bottom to 19 top)
+      const elementLine = gridHeight - Math.floor(element / gridWidth)
+      while(grid.filling.length < elementLine) {
+        const newLine = []
+        grid.filling.push(newLine)
+      }
+      //Add element position to the grid.filling array
+      grid.filling[elementLine - 1].push(element)
+    })
+  }
+  removeFullLine(){
+    //If a line is completed, remove the line from the grid.filling array
+    for(let i = 0; i < grid.filling.length; i++){
+      if(grid.filling[i].length === 10){
+        grid.filling.splice(i,1)
+        //Move the lines above down
+        for(let j = i; j < grid.filling.length; j++){
+          grid.filling[j].forEach((element, index) => grid.filling[j][index] = element + gridWidth)
+        }
+        i--
+      }
+    }
+  }
+  redraw(){
+    //Remove all css class shape
+    gridCollection.forEach(element => element.classList.remove('shape'))
+    //Add css class shape according to grid.filling content
+    grid.filling.forEach(element => {
+      element.forEach(element => gridCollection[element].classList.add('shape'))
+    })
+  }
 }
 
 class Shape{
   constructor(){
+    this.name
+    this.color
     this.position = []
     this.init()
   }
   init(){
     const randomShape = Math.floor(Math.random() * shapesList.length)
     //careful here, do not do "this.position = shapeLi..." otherwise the shapesList will be updated as the shape moves.
-    this.position = [...new Set(shapesList[randomShape])]
-    console.log(this.position);
+    this.name = shapesList[randomShape][0]
+    this.color = shapesList[randomShape][1]
+    this.position = [...new Set(shapesList[randomShape][2])]
   }
   hide(){
     this.position.forEach(element => gridCollection[element].classList.remove('shape'))
@@ -42,39 +83,18 @@ class Shape{
   show(){
     this.position.forEach(element => gridCollection[element].classList.add('shape'))
   }
+  move(direction){
+
+  }
 }
 
 function updateGrid(){
-  console.table(gridFilling);
-  shape.position.forEach(element => {
-    //Add a line in gridFilling if it doesn't exist yet (0 bottom to 19 top)
-    while(20 - Math.floor(element / gridWidth) > gridFilling.length){
-      const newLine = []
-      gridFilling.push(newLine)
-    }
-    //Fill gridFilling with the position of the shape
-    gridFilling[20 - Math.floor(element/gridWidth) - 1].push(element)
-  })
-  console.table(gridFilling);
-
-  //Is there a line completed ? Remove the line from the Array
-  for(let i = 0; i < gridFilling.length; i++){
-    if(gridFilling[i].length === 10){
-      gridFilling.splice(i,1)
-      //Add gridWidth to the position above the deleted to move them down
-      for(let j = i; j < gridFilling.length; j++){
-        gridFilling[j].forEach((element, index) => gridFilling[j][index] = element + gridWidth)
-      }
-      i--
-    }
-  }
-  //Reset the all gridCollection
-  gridCollection.forEach(element => element.classList.remove('shape'))
-  //Redraw the entire gridCollection based on the gridFilling array
-  gridFilling.forEach(element => {
-    element.forEach(element => gridCollection[element].classList.add('shape'))
-  })
-  console.table(gridFilling);
+  //Add shape to the grid
+  grid.addShapeToGrid()
+  //Check and remove lines if full
+  grid.removeFullLine()
+  //Reset and redraw the updated grid
+  grid.redraw()
 }
 
 function nextShape(){
@@ -91,16 +111,20 @@ function nextShape(){
 
 function checkIfMovePossible(direction){
   let movePossible = true
-  //Check if movement is possible
-  shape.position.forEach(element => {
-    //Obtain the next position of each element
-    const nextIndex = getNextPosition(direction, element)
-    //Check that the shape is not on a border before moving
-    if(element % gridWidth === 0 && direction === 'left' ||
-    element % gridWidth === gridWidth - 1 && direction === 'right' ||
-    element + gridWidth >= (gridHeight * gridWidth) && direction ==='down'||
-    //Verify that the next position doesn't contain a 'shape' class and is not itself
-    (gridCollection[nextIndex].classList.contains('shape') && !shape.position.includes(nextIndex))
+  shape.position.forEach(index => {
+    const nextIndex = getNextPosition(direction, index)
+    const gridLength = gridCollection.length
+    const indexXPos = index % gridWidth
+    const nextIndexXPos = nextIndex % gridWidth
+    //Check that next index in not colling with the grid filling
+    if(grid.contains(nextIndex) ||
+    nextIndex < 0 || nextIndex > gridLength ||
+    //Check that your not on a side if you want to move left or right
+    indexXPos === 0 && direction === 'left' ||
+    indexXPos === gridWidth - 1 && direction === 'right' ||
+    //During rotation, check that the next element didn't appear on the other side
+    //if roation was being made too close from a border
+    Math.abs(indexXPos - nextIndexXPos) > 2
     ) movePossible = false
   })
   return movePossible
@@ -110,16 +134,12 @@ function getNextPosition(direction, element){
   let distance
   switch(direction){
     case 'rotate':
-      //If first element (center of rotation) do not change its position
-      if(element === shape.position[0]) return shape.position[0]
+      //If first element (center of rotation) or element a squar do not rotate
+      if(element === shape.position[0] || shape.name === 'cube') return element
       //Calculation of the distance between the center of rotation and the element to rotate
       distance = shape.position[0] - element
-      //Return the rotated element using the rotation matrix
-      if(distance >= 0){
-        return element + matrixRotation[distance]
-      } else {
-        return element - matrixRotation[- distance]
-      }
+      //Return the element new position using the rotation matrix
+      return distance >= 0 ? element + matrixOfRotation[distance]: element - matrixOfRotation[- distance]
     case 'left':
       return element - 1
     case 'right':
@@ -136,7 +156,7 @@ function move(direction){
     shape.position.forEach((element,index) => {
       shape.position[index] = getNextPosition(direction, element)
     })
-    shape.position.forEach(element => gridCollection[element].classList.toggle('shape'))
+    shape.show()
     return true
   } else {
     return false
@@ -158,6 +178,7 @@ function init(){
   grid = new Grid()
   //create shape object
   shape = new Shape()
+  console.log(shape);
   shape.show()
   fall()
 }
