@@ -2,14 +2,33 @@ const gridWidth = 10
 const gridHeight = 20
 const delay = 1000
 let gridCollection
-let shape = [15,4,5,16]
 let fallTimerId
 const gridFilling = []
-const matrixRotationPositive = [0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0, 0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33]
-const matrixRotationNegative = [0, 9, 18, 27, 0, 0, 0, 0, -29, -20, -11, -2, 7, 0, 0, 0, 0, 0, 0, -31, -22, -13, 0, 0, 0, 0, 0, 0, 0, 0, -33]
+const matrixRotation = [0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0, 0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33]
+const shapesList = [[14,4,5,15], [4,3,5,6], [4,5,6,14], [6,4,5,16], [5,4,6,15], [15,5,6,14], [16,5,6, 17]]
+let shape
+
+class Shape{
+  constructor(){
+    this.position = []
+    this.init()
+  }
+  init(){
+    const randomShape = Math.floor(Math.random() * shapesList.length)
+    //careful here, do not do "this.position = shapeLi..." otherwise the shapesList will be updated as the shape moves.
+    this.position = Array.from(shapesList[randomShape])
+  }
+  hide(){
+    this.position.forEach(element => gridCollection[element].classList.remove('shape'))
+  }
+  show(){
+    this.position.forEach(element => gridCollection[element].classList.add('shape'))
+  }
+}
 
 function updateGrid(){
-  shape.forEach(element => {
+  console.table(gridFilling);
+  shape.position.forEach(element => {
     //Add a line in gridFilling if it doesn't exist yet (0 bottom to 19 top)
     while(20 - Math.floor(element / gridWidth) > gridFilling.length){
       const newLine = []
@@ -18,6 +37,8 @@ function updateGrid(){
     //Fill gridFilling with the position of the shape
     gridFilling[20 - Math.floor(element/gridWidth) - 1].push(element)
   })
+  console.table(gridFilling);
+
   //Is there a line completed ? Remove the line from the Array
   for(let i = 0; i < gridFilling.length; i++){
     if(gridFilling[i].length === 10){
@@ -35,33 +56,17 @@ function updateGrid(){
   gridFilling.forEach(element => {
     element.forEach(element => gridCollection[element].classList.add('shape'))
   })
-}
-function rotate(){
-  shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
-
-  for(let k = 1; k < shape.length; k++){
-    console.log(shape);
-    console.log(shape[0] - (shape[0] - shape[k]))
-    const distance = shape[0] - shape[k]
-    if(distance >= 0){
-      shape[k] += matrixRotationPositive[distance]
-    } else {
-      shape[k] -= matrixRotationNegative[- distance]
-    }
-  }
-  console.log(shape);
-  shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
-
+  console.table(gridFilling);
 }
 
 function nextShape(){
   updateGrid()
   //Loose condition, just to avoid memory leak
-  if(shape.includes(4)){
+  if(shape.position.includes(4)){
     alert('you lost')
   } else {
-    shape = [15,4,5,16] //Square shape
-    shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
+    shape = new Shape()
+    shape.show()
     fall()
   }
 }
@@ -69,20 +74,34 @@ function nextShape(){
 function checkIfMovePossible(direction){
   let movePossible = true
   //Check if movement is possible
-  shape.forEach(element => {
+  shape.position.forEach(element => {
+    //Obtain the next position of each element
     const nextIndex = getNextPosition(direction, element)
+    //Check that the shape is not on a border before moving
     if(element % gridWidth === 0 && direction === 'left' ||
     element % gridWidth === gridWidth - 1 && direction === 'right' ||
     element + gridWidth >= (gridHeight * gridWidth) && direction ==='down'||
     //Verify that the next position doesn't contain a 'shape' class and is not itself
-    (gridCollection[nextIndex].classList.contains('shape') && !shape.includes(nextIndex))
+    (gridCollection[nextIndex].classList.contains('shape') && !shape.position.includes(nextIndex))
     ) movePossible = false
   })
   return movePossible
 }
 
 function getNextPosition(direction, element){
+  let distance
   switch(direction){
+    case 'rotate':
+      //If first element (center of rotation) do not change its position
+      if(element === shape.position[0]) return shape.position[0]
+      //Calculation of the distance between the center of rotation and the element to rotate
+      distance = shape.position[0] - element
+      //Return the rotated element using the rotation matrix
+      if(distance >= 0){
+        return element + matrixRotation[distance]
+      } else {
+        return element - matrixRotation[- distance]
+      }
     case 'left':
       return element - 1
     case 'right':
@@ -95,11 +114,11 @@ function getNextPosition(direction, element){
 function move(direction){
   //Change the position of the shape and update the grid
   if(checkIfMovePossible(direction)){
-    shape.forEach(element => gridCollection[element].classList.toggle('shape'))
-    shape.forEach((element,index) => {
-      shape[index] = getNextPosition(direction, element)
+    shape.hide()
+    shape.position.forEach((element,index) => {
+      shape.position[index] = getNextPosition(direction, element)
     })
-    shape.forEach(element => gridCollection[element].classList.toggle('shape'))
+    shape.position.forEach(element => gridCollection[element].classList.toggle('shape'))
     return true
   } else {
     return false
@@ -129,15 +148,15 @@ function init(){
   //Create initial grid
   createGrid()
   //Display the first shape at the top of the grid
-  shape = [15,4,5,16] //Square shape
-  shape.forEach(shapeIndex => gridCollection[shapeIndex].classList.toggle('shape'))
+  shape = new Shape()
+  shape.show()
   fall()
 }
 
 function handleKeydown(e){
   switch(e.keyCode) {
     case 32:
-      rotate()
+      move('rotate')
       break
     case 37:
       move('left')
@@ -147,6 +166,9 @@ function handleKeydown(e){
       break
     case 40:
       move('down')
+      break
+    case 80:
+      clearInterval(fallTimerId)
       break
   }
 }
