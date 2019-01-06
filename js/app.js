@@ -7,6 +7,23 @@ const gridFilling = []
 const matrixRotation = [0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0, 0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33]
 const shapesList = [[14,4,5,15], [4,3,5,6], [4,5,6,14], [6,4,5,16], [5,4,6,15], [15,5,6,14], [16,5,6, 17]]
 let shape
+let grid
+
+class Grid{
+  constructor(){
+    this.init()
+  }
+
+  init(){
+    //Creation of the initial grid with divs
+    const gridFrame = document.getElementById('grid')
+    for(let i = 0; i < gridWidth * gridHeight; i++){
+      const cell = document.createElement('div')
+      gridFrame.appendChild(cell)
+    }
+    gridCollection = Array.from(document.querySelectorAll('#grid div'))
+  }
+}
 
 class Shape{
   constructor(){
@@ -16,7 +33,8 @@ class Shape{
   init(){
     const randomShape = Math.floor(Math.random() * shapesList.length)
     //careful here, do not do "this.position = shapeLi..." otherwise the shapesList will be updated as the shape moves.
-    this.position = Array.from(shapesList[randomShape])
+    this.position = [...new Set(shapesList[randomShape])]
+    console.log(this.position);
   }
   hide(){
     this.position.forEach(element => gridCollection[element].classList.remove('shape'))
@@ -134,20 +152,11 @@ function fall(){
   fallTimerId = setTimeout(fall, delay)
 }
 
-function createGrid(){
-  //Creation of the initial grid with divs
-  const gridFrame = document.getElementById('grid')
-  for(let i = 0; i < gridWidth * gridHeight; i++){
-    const cell = document.createElement('div')
-    gridFrame.appendChild(cell)
-  }
-  gridCollection = Array.from(document.querySelectorAll('#grid div'))
-}
 
 function init(){
-  //Create initial grid
-  createGrid()
-  //Display the first shape at the top of the grid
+  //Create grid object
+  grid = new Grid()
+  //create shape object
   shape = new Shape()
   shape.show()
   fall()
