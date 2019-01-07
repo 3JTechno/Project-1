@@ -1,16 +1,13 @@
 const gridWidth = 10
 const gridHeight = 20
-const delay = 1000
-let gridCollection
-let fallTimerId
-const matrixOfRotation = [0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0, 0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33]
+const speed = 1000
 const shapesList = [['cube', 'green',[14,4,5,15]], ['bar', 'red', [4,3,5,6]], ['L', 'black', [4,5,6,14]], ['inverted-L', 'saumon', [6,4,5,16]], ['T', 'mauve', [5,4,6,15]], ['S', 'orange', [15,5,6,14]],['inverted-S', 'blue', [16,5,6, 17]]]
-let shape
-let grid
+const matrixOfRotation = [0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0, 0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33]
+let  gridCollection, grid, shape, fallTimerId
 
 class Grid{
   constructor(){
-    this.filling = []
+    this.filling = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
     this.init()
   }
 
@@ -23,6 +20,7 @@ class Grid{
     }
     gridCollection = Array.from(document.querySelectorAll('#grid div'))
   }
+
   contains(nextIndex){
     //Concat all the line of the grid object and search if nextIndex is present
     const concatGrid = grid.filling.reduce((acc, element) => acc.concat(element),[])
@@ -41,29 +39,28 @@ class Grid{
   addShapeToGrid(){
     shape.position.forEach(element => {
       //Add a line in grid.filling if it doesn't exist yet (0 bottom to 19 top)
-      const elementLine = gridHeight - Math.floor(element / gridWidth)
-      while(grid.filling.length < elementLine) {
-        const newLine = []
-        grid.filling.push(newLine)
-      }
+      const elementLine = Math.floor(element / gridWidth)
       //Add element position to the grid.filling array
-      grid.filling[elementLine - 1].push(element)
+      grid.filling[elementLine].push(element)
     })
   }
 
   removeFullLine(){
     //If a line is completed, remove the line from the grid.filling array
-    for(let i = 0; i < grid.filling.length; i++){
+    for(let i = grid.filling.length - 1; i >= 0; i--){
       if(grid.filling[i].length === 10){
         grid.filling.splice(i,1)
+        //And add an empty line at the top of the grid.filling Array
+        grid.filling.unshift(new Array())
         //Move the lines above down
-        for(let j = i; j < grid.filling.length; j++){
+        for(let j = i; j >= 0; j--){
           grid.filling[j].forEach((element, index) => grid.filling[j][index] = element + gridWidth)
         }
-        i--
+        i++
       }
     }
   }
+
   redraw(){
     //Remove all css class shape
     gridCollection.forEach(element => element.classList.remove('shape'))
@@ -82,6 +79,7 @@ class Shape{
     this.position = []
     this.init()
   }
+
   init(){
     const randomShape = Math.floor(Math.random() * shapesList.length)
     //careful here, do not do "this.position = shapeLi..." otherwise the shapesList will be updated as the shape moves.
@@ -90,12 +88,15 @@ class Shape{
     this.position = [...new Set(shapesList[randomShape][2])]
     this.show()
   }
+
   hide(){
     this.position.forEach(element => gridCollection[element].classList.remove('shape'))
   }
+
   show(){
     this.position.forEach(element => gridCollection[element].classList.add('shape'))
   }
+
   move(direction){
     //Get new shape postion
     const nextShapePosition = this.getNextPosition(direction)
@@ -106,6 +107,7 @@ class Shape{
     this.show()
     return isMovePossible
   }
+
   getNextPosition(direction){
     let distance
     return this.position.map(element => {
@@ -126,6 +128,7 @@ class Shape{
       }
     })
   }
+
   checkIfMovePossible(nextShapePosition, direction){
     let movePossible = true
 
@@ -149,12 +152,13 @@ class Shape{
 
     return movePossible
   }
+
 }
 
 
 function nextShape(){
   grid.updateGrid()
-  //Loose condition, just to avoid memory leak
+  //Loose condition
   if(shape.position.includes(4)){
     alert('you lost')
   } else {
@@ -168,8 +172,8 @@ function fall(){
   const continueFall = shape.move('down')
   //Stop the time if shape cannot move down anymore
   if(!continueFall) return nextShape()
-  //Relauch the fall function every "delay" ms
-  fallTimerId = setTimeout(fall, delay)
+  //Relauch the fall function every "speed" ms
+  fallTimerId = setTimeout(fall, speed)
 }
 
 function init(){
