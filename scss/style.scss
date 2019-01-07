@@ -1,18 +1,20 @@
 *{
   box-sizing: border-box;
 }
-#grid{
-  height: 600px;
-  width: 300px;
+body{
+  display: flex;
+}
+#grid1, #grid2{
+  height: 560px;
+  width: 280px;
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
-
 }
-#grid >div{
+#grid1 > div, #grid2 > div{
   border: 2px solid grey;
-  width:30px;
-  height:30px;
+  width:28px;
+  height:28px;
   &.shape{
     background-color: grey;
   }
