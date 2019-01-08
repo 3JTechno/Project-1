@@ -14,14 +14,17 @@ const matrixOfRotation = [
   0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0,
   0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33
 ]
+const nbOfPlayer = 1
+let fallTimerId
+let bestScore
 
 class Grid{
   constructor(player){
     this.player = player
     this.gridCollection
     this.filling = new Array(20).fill(null).map(() => []) // ugly :(
+    this.score = document.querySelector('#score')
     this.shape
-    this.fallTimerId
 
     this.fall = this.fall.bind(this)
     this.handleKeydown = this.handleKeydown.bind(this)
@@ -38,20 +41,22 @@ class Grid{
       gridFrame.appendChild(cell)
     }
     this.gridCollection = Array.from(gridFrame.querySelectorAll('div'))
-
+    this.score.innerHTML = 0
     document.addEventListener('keydown', this.handleKeydown)
 
     this.shape = new Shape()
-    this.fall()
+
   }
 
   fall(){
     //Move shape down a line
     const continueFall = this.move('down')
     //Stop the time if shape cannot move down anymore
-    if(!continueFall) this.nextShape()
-    //Relauch the fall function every "speed" ms
-    this.fallTimerId = setTimeout(this.fall, speed)
+    if(!continueFall && this.shape.position.includes(4)){
+      endGame(parseFloat(this.score.innerHTML))
+    } else if(!continueFall){
+      this.nextShape()
+    }
   }
 
   hideShape(){
@@ -131,13 +136,19 @@ class Grid{
         this.filling.splice(i,1)
         //And add an empty line at the top of the this.filling Array
         this.filling.unshift(new Array())
-        //Move the lines above down
+        this.increaseScore()
         for(let j = i; j >= 0; j--){
+          //Move the lines above down
           this.filling[j].forEach((element, index) => this.filling[j][index] = element + gridWidth)
         }
         i++
       }
     }
+  }
+
+  increaseScore(){
+    //Increase the score by 1
+    this.score.innerHTML = String(parseFloat(this.score.innerHTML) + 1)
   }
 
   redraw(){
@@ -150,14 +161,11 @@ class Grid{
   }
 
   nextShape(){
+    console.log(this.shape);
     this.updateGrid()
     //Lose condition
-    if(this.shape.position.includes(4)){
-      alert('you lost')
-    } else {
-      this.shape = new Shape()
-      this.showShape()
-    }
+    this.shape = new Shape()
+    this.showShape()
   }
 
   handleKeydown(e){
@@ -175,7 +183,7 @@ class Grid{
         this.move('down')
         break
       case 80:
-        clearInterval(this.fallTimerId)
+        clearInterval(fallTimerId)
         break
     }
   }
@@ -220,10 +228,42 @@ class Shape{
 
 }
 
+function endGame(score){
+  clearInterval(fallTimerId)
+  console.log(score, bestScore.innerHTML);
+  if(score > bestScore.innerHTML){
+    localStorage.setItem('tetris-best-score', score)
+    bestScore.innerHTML = score
+  }
+  alert('you lost')
+}
+
+function startGame(nbOfPlayer){
+  if(nbOfPlayer === 1 ){
+    const grid1 = new Grid('player1')
+    fallTimerId = setInterval(() => {
+      grid1.fall()
+    },speed)
+  } else if(nbOfPlayer === 2){
+    const grid1 = new Grid('player1')
+    const grid2 = new Grid('player2')
+    fallTimerId = setInterval(() => {
+      grid1.fall()
+      grid2.fall()
+    },speed)
+  }
+}
+
 function init(){
   //Create grid object
-  const grid1 = new Grid('player1')
-  const grid2 = new Grid('player2')
+  bestScore = document.querySelector('#best-score')
+  if(localStorage.getItem('tetris-best-score')){
+    bestScore.innerHTML = localStorage.getItem('tetris-best-score')
+  } else {
+    bestScore.innerHTML = 0
+  }
+
+  startGame(nbOfPlayer)
 }
 
 document.addEventListener('DOMContentLoaded', init)
