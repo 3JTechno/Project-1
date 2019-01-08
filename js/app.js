@@ -29,9 +29,10 @@ class Grid{
     this.filling = new Array(20).fill(null).map(() => []) // ugly :(
     this.shape
     this.score
+
     this.fall = this.fall.bind(this)
     this.handleKeydown = this.handleKeydown.bind(this)
-    this.gridFrame
+
     this.init()
   }
 
@@ -253,62 +254,54 @@ function startGame(){
     startBtn.innerHTML = 'Start'
     player1Btn.disabled = false
     player2Btn.disabled = false
-    gameStarted = false
     grid1.destruct()
     if(grid2) grid2.destruct()
-    startBtn.blur()
   } else {
-    if(nbOfPlayer === '1' ){
-      grid1 = new Grid('1', 'grid1')
-      fallTimerId = setInterval(() => {
-        grid1.fall()
-      },speed)
-    } else if(nbOfPlayer === '2'){
-      grid1 = new Grid('1', 'grid1')
+    //Create grid 1 in anycase
+    grid1 = new Grid('1', 'grid1')
+    fallTimerId = setInterval(() => {
+      grid1.fall()
+    },speed)
+    //If 2 players, create the second grid
+    if(nbOfPlayer === '2'){
       grid2 = new Grid('2', 'grid2')
       fallTimerId = setInterval(() => {
-        grid1.fall()
         grid2.fall()
       },speed)
     }
     player1Btn.disabled = true
     player2Btn.disabled = true
-    gameStarted = true
     startBtn.innerHTML = 'Stop'
-    //Unfocus the start button to avoid interction when spacebar key is pressed
-    startBtn.blur()
   }
+  gameStarted = !gameStarted
+  //Unfocus the start button to avoid interction when spacebar key is pressed
+  startBtn.blur()
 }
 
 function switchPlayer(e){
+  //Switch between 1 and 2 players view
   if(!e.target.classList.contains('selected')){
+    nbOfPlayer = nbOfPlayer === '1' ? '2' : '1'
     player1Btn.classList.toggle('selected')
     player2Btn.classList.toggle('selected')
-    nbOfPlayer = e.target.id
-    if(nbOfPlayer === '1'){
-      boardBestScore.classList.remove('hide')
-      boardPlayer2.classList.add('hide')
-    } else if(nbOfPlayer === '2'){
-      boardBestScore.classList.add('hide')
-      boardPlayer2.classList.remove('hide')
-    }
+    boardBestScore.classList.toggle('hide')
+    boardPlayer2.classList.toggle('hide')
   }
 }
 
 function init(){
   //Set default nb of player to 1
   nbOfPlayer = '1'
-  //Display user best score if any
-  bestScore = document.querySelector('#best-score')
-  if(localStorage.getItem('tetris-best-score')){
-    bestScore.innerHTML = localStorage.getItem('tetris-best-score')
-  }
 
   boardBestScore  = document.querySelector('.bestScore')
   boardPlayer2 = document.querySelector('.player2')
   player1Btn = document.getElementById('1')
   player2Btn = document.getElementById('2')
   startBtn = document.getElementById('start')
+  bestScore = document.getElementById('best-score')
+
+  //Display user best score if any
+  bestScore.innerHTML = localStorage.getItem('tetris-best-score') || 0
 
   player1Btn.addEventListener('click', switchPlayer)
   player2Btn.addEventListener('click', switchPlayer)
