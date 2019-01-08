@@ -14,33 +14,36 @@ const matrixOfRotation = [
   0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0,
   0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33
 ]
-const nbOfPlayer = 1
-let fallTimerId
-let bestScore
+let nbOfPlayer,fallTimerId,
+  boardBestScore, bestScore,
+  boardPlayer2,
+  grid1, grid2,
+  player1Btn, player2Btn, startBtn,
+  gameStarted
 
 class Grid{
-  constructor(player){
+  constructor(player, gridSelection){
     this.player = player
+    this.gridFrame = document.getElementById(gridSelection)
     this.gridCollection
     this.filling = new Array(20).fill(null).map(() => []) // ugly :(
-    this.score = document.querySelector('#score')
     this.shape
-
+    this.score
     this.fall = this.fall.bind(this)
     this.handleKeydown = this.handleKeydown.bind(this)
-
+    this.gridFrame
     this.init()
   }
 
   init(){
     //Creation of the initial grid according to the player
-    const gridSelection = this.player === 'player1' ? 'grid1':'grid2'
-    const gridFrame = document.getElementById(gridSelection)
     for(let i = 0; i < gridWidth * gridHeight; i++){
       const cell = document.createElement('div')
-      gridFrame.appendChild(cell)
+      this.gridFrame.appendChild(cell)
     }
-    this.gridCollection = Array.from(gridFrame.querySelectorAll('div'))
+    this.gridCollection = Array.from(this.gridFrame.querySelectorAll('div'))
+
+    this.score = document.getElementById(`score${this.player}`)
     this.score.innerHTML = 0
     document.addEventListener('keydown', this.handleKeydown)
 
@@ -48,12 +51,17 @@ class Grid{
 
   }
 
+  destruct(){
+    this.gridFrame.innerHTML = ''
+    clearInterval(fallTimerId)
+  }
+
   fall(){
     //Move shape down a line
     const continueFall = this.move('down')
     //Stop the time if shape cannot move down anymore
     if(!continueFall && this.shape.position.includes(4)){
-      endGame(parseFloat(this.score.innerHTML))
+      endGame(this.player, parseFloat(this.score.innerHTML))
     } else if(!continueFall){
       this.nextShape()
     }
@@ -161,7 +169,6 @@ class Grid{
   }
 
   nextShape(){
-    console.log(this.shape);
     this.updateGrid()
     //Lose condition
     this.shape = new Shape()
@@ -228,42 +235,84 @@ class Shape{
 
 }
 
-function endGame(score){
+function endGame(player, score){
   clearInterval(fallTimerId)
-  console.log(score, bestScore.innerHTML);
-  if(score > bestScore.innerHTML){
-    localStorage.setItem('tetris-best-score', score)
-    bestScore.innerHTML = score
+  if(nbOfPlayer === '1'){
+    if(score > bestScore.innerHTML){
+      localStorage.setItem('tetris-best-score', score)
+      bestScore.innerHTML = score
+    }
+    alert('you lost')
+  } else if(nbOfPlayer === '2'){
+    alert(`Player ${player} lose`)
   }
-  alert('you lost')
 }
 
-function startGame(nbOfPlayer){
-  if(nbOfPlayer === 1 ){
-    const grid1 = new Grid('player1')
-    fallTimerId = setInterval(() => {
-      grid1.fall()
-    },speed)
-  } else if(nbOfPlayer === 2){
-    const grid1 = new Grid('player1')
-    const grid2 = new Grid('player2')
-    fallTimerId = setInterval(() => {
-      grid1.fall()
-      grid2.fall()
-    },speed)
+function startGame(){
+  if(gameStarted){
+    startBtn.innerHTML = 'Start'
+    player1Btn.disabled = false
+    player2Btn.disabled = false
+    gameStarted = false
+    grid1.destruct()
+    if(grid2) grid2.destruct()
+    startBtn.blur()
+  } else {
+    if(nbOfPlayer === '1' ){
+      grid1 = new Grid('1', 'grid1')
+      fallTimerId = setInterval(() => {
+        grid1.fall()
+      },speed)
+    } else if(nbOfPlayer === '2'){
+      grid1 = new Grid('1', 'grid1')
+      grid2 = new Grid('2', 'grid2')
+      fallTimerId = setInterval(() => {
+        grid1.fall()
+        grid2.fall()
+      },speed)
+    }
+    player1Btn.disabled = true
+    player2Btn.disabled = true
+    gameStarted = true
+    startBtn.innerHTML = 'Stop'
+    //Unfocus the start button to avoid interction when spacebar key is pressed
+    startBtn.blur()
+  }
+}
+
+function switchPlayer(e){
+  if(!e.target.classList.contains('selected')){
+    player1Btn.classList.toggle('selected')
+    player2Btn.classList.toggle('selected')
+    nbOfPlayer = e.target.id
+    if(nbOfPlayer === '1'){
+      boardBestScore.classList.remove('hide')
+      boardPlayer2.classList.add('hide')
+    } else if(nbOfPlayer === '2'){
+      boardBestScore.classList.add('hide')
+      boardPlayer2.classList.remove('hide')
+    }
   }
 }
 
 function init(){
-  //Create grid object
+  //Set default nb of player to 1
+  nbOfPlayer = '1'
+  //Display user best score if any
   bestScore = document.querySelector('#best-score')
   if(localStorage.getItem('tetris-best-score')){
     bestScore.innerHTML = localStorage.getItem('tetris-best-score')
-  } else {
-    bestScore.innerHTML = 0
   }
 
-  startGame(nbOfPlayer)
+  boardBestScore  = document.querySelector('.bestScore')
+  boardPlayer2 = document.querySelector('.player2')
+  player1Btn = document.getElementById('1')
+  player2Btn = document.getElementById('2')
+  startBtn = document.getElementById('start')
+
+  player1Btn.addEventListener('click', switchPlayer)
+  player2Btn.addEventListener('click', switchPlayer)
+  startBtn.addEventListener('click', startGame)
 }
 
 document.addEventListener('DOMContentLoaded', init)

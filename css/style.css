@@ -1,2 +1,2 @@
-*{box-sizing:border-box}body{display:flex}#grid1,#grid2{height:560px;width:280px;margin:0 auto;display:flex;flex-wrap:wrap}#grid1>div,#grid2>div{border:2px solid grey;width:28px;height:28px}#grid1>div.shape,#grid2>div.shape{background-color:grey}
+*{box-sizing:border-box}body{display:flex}.player1,.player2{display:flex}#grid1,#grid2{height:560px;width:280px;margin:0 auto;display:flex;flex-wrap:wrap;border:2px solid grey;box-sizing:content-box}#grid1>div,#grid2>div{border:2px solid grey;width:28px;height:28px}#grid1>div.shape,#grid2>div.shape{background-color:grey}.hide{display:none}.selected{border:2px solid blue}button:disabled{background-color:#cccccc;color:#666666}
 /*# sourceMappingURL=style.css.map */
