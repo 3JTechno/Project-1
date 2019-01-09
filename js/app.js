@@ -17,19 +17,19 @@ const matrixOfRotation = [
 let nbOfPlayer,fallTimerId,
   boardBestScore, bestScore,
   boardPlayer2,
-  grid1, grid2,
   player1Btn, player2Btn, startBtn,
   gameStarted
 let grids = []
 
 class Grid{
-  constructor(player){
+  constructor(player, callback){
     this.player = player
     this.gridFrame = document.getElementById(`grid${player}`)
     this.gridCollection
     this.filling = new Array(20).fill(null).map(() => []) // ugly :(
     this.shape
     this.score
+    this.addLineToOpponent = callback
 
     this.fall = this.fall.bind(this)
     this.handleKeydown = this.handleKeydown.bind(this)
@@ -66,6 +66,7 @@ class Grid{
       endGame(this.player, parseFloat(this.score.innerHTML))
     } else if(!continueFall){
       this.nextShape()
+      console.log(`player${this.player}`,this.filling);
     }
   }
 
@@ -151,9 +152,24 @@ class Grid{
           //Move the lines above down
           this.filling[j].forEach((element, index) => this.filling[j][index] = element + gridWidth)
         }
+        this.addLineToOpponent(this.player === 1 ? 2 : 1)
         i++
       }
     }
+  }
+
+  addOneLine(){
+    //Add a new line at the bottom of the grid
+    const newLine = []
+    this.filling.shift()
+    this.filling.push(newLine)
+    //Move the lines up
+    this.filling.forEach(line => {
+      line.forEach((element, index) => line[index] -= gridWidth)
+    })
+    //Redraw grid
+    this.redraw()
+    console.log(`player${this.player}`,this.filling);
   }
 
   increaseScore(){
@@ -256,10 +272,14 @@ function reinitiateGrid(){
   grids = new Array()
 }
 
+function addLineToOpponent(player){
+  grids[player-1].addOneLine()
+}
+
 function createGrids(){
   //Create grids based on number of player
   for(let i = 0; i < nbOfPlayer; i++){
-    grids.push(new Grid(i+1))
+    grids.push(new Grid(i+1, addLineToOpponent))
   }
   fallTimerId = setInterval(() => {
     grids.forEach(grid => grid.fall())
