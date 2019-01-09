@@ -252,8 +252,6 @@ function endGame(player, score){
 function startGame(){
   if(gameStarted){
     startBtn.innerHTML = 'Start'
-    player1Btn.disabled = false
-    player2Btn.disabled = false
     grid1.destruct()
     if(grid2) grid2.destruct()
   } else {
@@ -269,13 +267,13 @@ function startGame(){
         grid2.fall()
       },speed)
     }
-    player1Btn.disabled = true
-    player2Btn.disabled = true
     startBtn.innerHTML = 'Stop'
   }
+  player1Btn.disabled = !player1Btn.disabled
+  player2Btn.disabled = !player2Btn.disabled
+  startBtn.blur()
   gameStarted = !gameStarted
   //Unfocus the start button to avoid interction when spacebar key is pressed
-  startBtn.blur()
 }
 
 function switchPlayer(e){
