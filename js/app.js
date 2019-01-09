@@ -20,11 +20,12 @@ let nbOfPlayer,fallTimerId,
   grid1, grid2,
   player1Btn, player2Btn, startBtn,
   gameStarted
+let grids = []
 
 class Grid{
-  constructor(player, gridSelection){
+  constructor(player){
     this.player = player
-    this.gridFrame = document.getElementById(gridSelection)
+    this.gridFrame = document.getElementById(`grid${player}`)
     this.gridCollection
     this.filling = new Array(20).fill(null).map(() => []) // ugly :(
     this.shape
@@ -238,48 +239,51 @@ class Shape{
 
 function endGame(player, score){
   clearInterval(fallTimerId)
-  if(nbOfPlayer === '1'){
+  if(nbOfPlayer === 1){
     if(score > bestScore.innerHTML){
       localStorage.setItem('tetris-best-score', score)
       bestScore.innerHTML = score
     }
     alert('you lost')
-  } else if(nbOfPlayer === '2'){
+  } else if(nbOfPlayer === 2){
     alert(`Player ${player} lose`)
   }
 }
 
-function startGame(){
-  if(gameStarted){
-    startBtn.innerHTML = 'Start'
-    grid1.destruct()
-    if(grid2) grid2.destruct()
-  } else {
-    //Create grid 1 in anycase
-    grid1 = new Grid('1', 'grid1')
-    fallTimerId = setInterval(() => {
-      grid1.fall()
-    },speed)
-    //If 2 players, create the second grid
-    if(nbOfPlayer === '2'){
-      grid2 = new Grid('2', 'grid2')
-      fallTimerId = setInterval(() => {
-        grid2.fall()
-      },speed)
-    }
-    startBtn.innerHTML = 'Stop'
+function reinitiateGrid(){
+  //Kill grid objects and reinitialise grids
+  grids.forEach(element => element.destruct())
+  grids = new Array()
+}
+
+function createGrids(){
+  //Create grids based on number of player
+  for(let i = 0; i < nbOfPlayer; i++){
+    grids.push(new Grid(i+1))
   }
+  fallTimerId = setInterval(() => {
+    grids.forEach(grid => grid.fall())
+  },speed)
+}
+
+function startGame(){
+  if(!gameStarted){
+    createGrids(nbOfPlayer)
+  } else {
+    reinitiateGrid()
+  }
+  startBtn.innerHTML = startBtn.innerHTML === 'Start'? 'Stop' : 'Start'
   player1Btn.disabled = !player1Btn.disabled
   player2Btn.disabled = !player2Btn.disabled
+  //Unfocus the start button to avoid interction when spacebar key is pressed
   startBtn.blur()
   gameStarted = !gameStarted
-  //Unfocus the start button to avoid interction when spacebar key is pressed
 }
 
 function switchPlayer(e){
   //Switch between 1 and 2 players view
   if(!e.target.classList.contains('selected')){
-    nbOfPlayer = nbOfPlayer === '1' ? '2' : '1'
+    nbOfPlayer = nbOfPlayer === 1 ? 2 : 1
     player1Btn.classList.toggle('selected')
     player2Btn.classList.toggle('selected')
     boardBestScore.classList.toggle('hide')
@@ -289,7 +293,7 @@ function switchPlayer(e){
 
 function init(){
   //Set default nb of player to 1
-  nbOfPlayer = '1'
+  nbOfPlayer = 1
 
   boardBestScore  = document.querySelector('.bestScore')
   boardPlayer2 = document.querySelector('.player2')
