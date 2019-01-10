@@ -1,37 +1,78 @@
 *{
   box-sizing: border-box;
+  color: white;
 }
 body{
+  background-image: linear-gradient(to right, #4B79A1, #283E51);
   display: flex;
+  justify-content: center;
 }
 .player1, .player2{
   display: flex;
+
 }
 #grid1, #grid2{
+  box-shadow: 0px 0px 10px 4px white;
+
   height: 560px;
   width: 280px;
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
   border: 2px solid grey;
+  border-top: none;
   box-sizing:content-box;
-
-}
-#grid1 > div, #grid2 > div{
-  border: 2px solid grey;
-  width:28px;
-  height:28px;
-  &.shape{
-    background-color: grey;
+  & > div{
+    width:28px;
+    height:28px;
   }
+}
+
+.shape{
+  border: 1px solid grey;
+  box-shadow: 0px 0px 20px 4px white;
 }
 .hide{
   display: none;
 }
-.selected{
-  border: 2px solid blue
+.buttons{
+  margin-top: 200px;
 }
-button:disabled{
-  background-color: #cccccc;
-  color: #666666;
+button{
+  width:90px;
+
+  background-color: transparent;
+  border-radius: 15px;
+  font-size: 18px;
+  padding:10px;
+  font-weight: 100;
+  margin: 20px 20px;
+  &:focus {outline:0;}
+
+  &:disabled{
+    border: #666666;
+    color: #666666;
+  }
+  &.selected{
+    border: 2px solid blue;
+    color: white;
+  }
+  &#start{
+    width:90px;
+    display: block;
+    margin: 0 auto;
+  }
+}
+.control{
+  margin: 20px 0 0 30px ;
+  &>p{
+    margin: 10px 0 0 25px;
+  }
+}
+.line-shape{
+  display: flex;
+  & > div{
+  width:14px;
+  height:14px;
+  }
 }

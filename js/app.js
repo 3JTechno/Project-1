@@ -20,6 +20,7 @@ let nbOfPlayer,fallTimerId,
   player1Btn, player2Btn, startBtn,
   gameStarted
 let grids = []
+const keysSets = [[32,37,39,40],[16,65,68,83]]
 
 class Grid{
   constructor(player, callback){
@@ -30,10 +31,11 @@ class Grid{
     this.shape
     this.score
     this.addLineToOpponent = callback
+    this.gameControl = player === 1 && nbOfPlayer === 2 ? keysSets[1]:keysSets[0]
+    this.arrayKeyPressed = []
 
     this.fall = this.fall.bind(this)
-    this.handleKeydown = this.handleKeydown.bind(this)
-
+    this.handleSimultaneousKeyDown = this.handleSimultaneousKeyDown.bind(this)
     this.init()
   }
 
@@ -47,10 +49,24 @@ class Grid{
 
     this.score = document.getElementById(`score${this.player}`)
     this.score.innerHTML = 0
-    document.addEventListener('keydown', this.handleKeydown)
+    // document.addEventListener('keydown', this.handleKeydown)
+    document.addEventListener('keydown', this.handleSimultaneousKeyDown)
+    document.addEventListener('keyup', this.handleSimultaneousKeyDown)
+
+
+    // document.addEventListener('keyup', (e) => console.log('keyup', e.keyCode))
 
     this.shape = new Shape()
 
+  }
+  handleSimultaneousKeyDown(e){
+    //In two player mode, this allow both players maintain a key down to move faster
+    if(e.type === 'keydown'){
+      if(!this.arrayKeyPressed.includes(e.keyCode)) this.arrayKeyPressed.push(e.keyCode)
+    } else if (e.type === 'keyup'){
+      this.arrayKeyPressed.splice(this.arrayKeyPressed.indexOf(e.keyCode),1)
+    }
+    this.arrayKeyPressed.forEach(key => this.handleKeydown(key))
   }
 
   destruct(){
@@ -66,7 +82,7 @@ class Grid{
       endGame(this.player, parseFloat(this.score.innerHTML))
     } else if(!continueFall){
       this.nextShape()
-      console.log(`player${this.player}`,this.filling);
+      console.log(this.filling);
     }
   }
 
@@ -76,6 +92,7 @@ class Grid{
 
   showShape(){
     this.shape.position.forEach(element => this.gridCollection[element].classList.add('shape'))
+
   }
 
   move(direction){
@@ -152,21 +169,28 @@ class Grid{
           //Move the lines above down
           this.filling[j].forEach((element, index) => this.filling[j][index] = element + gridWidth)
         }
-        this.addLineToOpponent(this.player === 1 ? 2 : 1)
+        if(nbOfPlayer === 2) this.addLineToOpponent(this.player === 1 ? 2 : 1)
         i++
       }
     }
   }
 
   addOneLine(){
-    //Add a new line at the bottom of the grid
-    const newLine = []
+    //Generate a new line with random number of bricks
+    const newLine = new Array()
+    for(let i = 0; i < 10; i++){
+      const addAnBrick = Boolean(Math.round(Math.random()))
+      if(addAnBrick) newLine.push(190+i)
+    }
+    //Remove top line
     this.filling.shift()
-    this.filling.push(newLine)
     //Move the lines up
     this.filling.forEach(line => {
       line.forEach((element, index) => line[index] -= gridWidth)
     })
+    //Insert new line at the bottom
+    this.filling.push(newLine)
+
     //Redraw grid
     this.redraw()
     console.log(`player${this.player}`,this.filling);
@@ -193,18 +217,18 @@ class Grid{
     this.showShape()
   }
 
-  handleKeydown(e){
-    switch(e.keyCode) {
-      case 32:
+  handleKeydown(key){
+    switch(key) {
+      case this.gameControl[0]:
         this.move('rotate')
         break
-      case 37:
+      case this.gameControl[1]:
         this.move('left')
         break
-      case 39:
+      case this.gameControl[2]:
         this.move('right')
         break
-      case 40:
+      case this.gameControl[3]:
         this.move('down')
         break
       case 80:
