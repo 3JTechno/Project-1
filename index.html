@@ -3,49 +3,38 @@
   <head>
     <meta charset="utf-8">
     <title>Project 1 - Tetris</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
     <link rel="stylesheet" href="./css/style.css">
     <script type="text/javascript" src="./js/app.js">
     </script>
   </head>
   <body>
 
+    <div class="bestScore">
+      <i class="fas fa-trophy"></i>
+      <p id="best-score"></p>
+    </div>
 
     <div class="player1">
-      <div class="bestScore">
-        <p>Best Score</p>
-        <p id="best-score"></p>
-      </div>
-      <div id="grid1"></div>
+      <div class="grid" id="grid1"></div>
       <div class="control">
-        <div class="line-shape">
-          <div class="shape">
-
-          </div>
-          <div class="shape">
-
-          </div>
-          <div class="shape">
-
-          </div>
-          <div class="shape">
-
-          </div>
-        </div>
+        <i class="fas fa-grip-lines fa-2x"></i>
         <p id=score1>0</p>
       </div>
-      <div class="buttons">
-        <button id="1" class="selected">1</button>
-        <button type="button" id="2" class="">2</button>
-        <button type="button" id="start">Start</button>
-      </div>
+    </div>
+
+    <div class="buttons">
+      <button type="button" id="1" class="selected">1</button>
+      <button type="button" id="2" class="">2</button>
+      <button type="button" id="start">Start</button>
     </div>
 
     <div class="player2 hide">
       <div class="control">
-        <p>Line</p>
+        <i class="fas fa-grip-lines fa-2x"></i>
         <p id=score2>0</p>
       </div>
-      <div id="grid2"></div>
+      <div class="grid" id="grid2"></div>
     </div>
 
   </body>
