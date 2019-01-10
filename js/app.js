@@ -2,40 +2,42 @@ const gridWidth = 10
 const gridHeight = 20
 const speed = 1000
 const shapesList = [
-  { name: 'cube', color: 'green', coords: [14,4,5,15] },
-  { name: 'bar', color: 'red', coords: [4,3,5,6] },
-  { name: 'L', color: 'black', coords: [4,5,6,14] },
-  { name: 'inverted-L', color: 'saumon', coords: [6,4,5,16] },
-  { name: 'T', color: 'mauve', coords: [5,4,6,15] },
-  { name: 'S', color: 'orange', coords: [15,5,6,14] },
-  { name: 'inverted-S', color: 'blue', coords: [16,5,6, 17] }
+  { name: 'cube', coords: [14,4,5,15] },
+  { name: 'bar', coords: [4,3,5,6] },
+  { name: 'L', coords: [4,5,6,14] },
+  { name: 'inverted-L', coords: [6,4,5,16] },
+  { name: 'T', coords: [5,4,6,15] },
+  { name: 'S', coords: [15,5,6,14] },
+  { name: 'inverted-S',coords: [16,5,6, 17] }
 ]
 const matrixOfRotation = [
   0, -9, -18, -27, 0, 0, 0, 0, 29, 20, 11, 2, -7, 0, 0,
   0, 0, 0, 0, 31, 22, 13, 0, 0, 0, 0, 0, 0, 0, 0, 33
 ]
+const keysSets = [[32,37,39,40],[16,65,68,83]]
 let nbOfPlayer,fallTimerId,
   boardBestScore, bestScore,
   boardPlayer2,
   player1Btn, player2Btn, startBtn, winner,
   gameStarted
 let grids = []
-const keysSets = [[32,37,39,40],[16,65,68,83]]
 
 class Grid{
   constructor(player, callback){
     this.player = player
-    this.gridFrame = document.getElementById(`grid${player}`)
-    this.gridCollection
-    this.filling = new Array(20).fill(null).map(() => []) // ugly :(
     this.shape
     this.score
+    this.gridCollection
+    this.arrayKeyPressed = []
+    this.gridFrame = document.getElementById(`grid${player}`)
+    this.filling = new Array(20).fill(null).map(() => []) // ugly :(
     this.addLineToOpponent = callback
     this.gameControl = player === 1 && nbOfPlayer === 2 ? keysSets[1]:keysSets[0]
-    this.arrayKeyPressed = []
 
+    //This bind the grid object when document is calling these function
     this.fall = this.fall.bind(this)
     this.handleSimultaneousKeyDown = this.handleSimultaneousKeyDown.bind(this)
+
     this.init()
   }
 
@@ -49,29 +51,12 @@ class Grid{
     console.log(this.gridCollection)
     this.score = document.getElementById(`score${this.player}`)
     this.score.innerHTML = 0
-    // document.addEventListener('keydown', this.handleKeydown)
+
     document.addEventListener('keydown', this.handleSimultaneousKeyDown)
     document.addEventListener('keyup', this.handleSimultaneousKeyDown)
 
-
-    // document.addEventListener('keyup', (e) => console.log('keyup', e.keyCode))
-
     this.shape = new Shape()
 
-  }
-  handleSimultaneousKeyDown(e){
-    //In two player mode, this allow both players maintain a key down to move faster
-    if(e.type === 'keydown'){
-      if(!this.arrayKeyPressed.includes(e.keyCode)) this.arrayKeyPressed.push(e.keyCode)
-    } else if (e.type === 'keyup'){
-      this.arrayKeyPressed.splice(this.arrayKeyPressed.indexOf(e.keyCode),1)
-    }
-    this.arrayKeyPressed.forEach(key => this.handleKeydown(key))
-  }
-
-  destruct(){
-    this.gridFrame.innerHTML = ''
-    clearInterval(fallTimerId)
   }
 
   fall(){
@@ -140,12 +125,8 @@ class Grid{
   updateGrid(){
     //Add shape to the grid
     this.addShapeToGrid()
-    //Check and remove lines if full
-    // this.removeFullLine()
-    //Make the lines to be removed blinking
+    //Make full lines blinking and remove them
     this.blinkLine(this.removeFullLine())
-    //Reset and redraw the updated grid
-    // this.redraw()
   }
 
   addShapeToGrid(){
@@ -182,7 +163,7 @@ class Grid{
 
   blinkLine(lineToBeRemoved){
     if(lineToBeRemoved.length === 0) return this.redraw()
-    
+
     lineToBeRemoved.forEach(line => {
       for(let i = 0; i < 10; i++){
         this.gridCollection[String(line)+String(i)].classList.add('blink')
@@ -197,6 +178,18 @@ class Grid{
       }
       count ++
     },500)
+  }
+
+  increaseScore(){
+    //Increase the score by 1
+    this.score.innerHTML = String(parseFloat(this.score.innerHTML) + 1)
+  }
+
+  nextShape(){
+    this.updateGrid()
+    //Lose condition
+    this.shape = new Shape()
+    this.showShape()
   }
 
   addOneLine(){
@@ -219,11 +212,6 @@ class Grid{
     this.redraw()
   }
 
-  increaseScore(){
-    //Increase the score by 1
-    this.score.innerHTML = String(parseFloat(this.score.innerHTML) + 1)
-  }
-
   redraw(){
     //Remove all css class shape
     this.gridCollection.forEach(element => element.className = '')
@@ -234,11 +222,9 @@ class Grid{
     })
   }
 
-  nextShape(){
-    this.updateGrid()
-    //Lose condition
-    this.shape = new Shape()
-    this.showShape()
+  destruct(){
+    this.gridFrame.innerHTML = ''
+    clearInterval(fallTimerId)
   }
 
   handleKeydown(key){
@@ -260,6 +246,17 @@ class Grid{
         break
     }
   }
+
+  handleSimultaneousKeyDown(e){
+    //In two player mode, this allow both players to maintain a key down to move faster
+    if(e.type === 'keydown'){
+      if(!this.arrayKeyPressed.includes(e.keyCode)) this.arrayKeyPressed.push(e.keyCode)
+    } else if (e.type === 'keyup'){
+      this.arrayKeyPressed.splice(this.arrayKeyPressed.indexOf(e.keyCode),1)
+    }
+    this.arrayKeyPressed.forEach(key => this.handleKeydown(key))
+  }
+
 }
 
 class Shape{
@@ -273,9 +270,8 @@ class Shape{
   init(){
     const randomShape = Math.floor(Math.random() * shapesList.length)
     //careful here, do not do "this.position = shapeLi..." otherwise the shapesList will be updated as the shape moves.
-    this.name = shapesList[1].name
-    this.color = shapesList[randomShape].color
-    this.position = shapesList[1].coords.slice()
+    this.name = shapesList[randomShape].name
+    this.position = shapesList[randomShape].coords.slice()
   }
 
   getNextPosition(direction){
@@ -320,6 +316,7 @@ function reinitiateGrid(){
   grids.forEach(element => element.destruct())
   grids = new Array()
   winner.innerHTML = ''
+  winner.classList.remove('display-score')
 }
 
 function addLineToOpponent(player){

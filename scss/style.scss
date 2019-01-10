@@ -4,24 +4,27 @@
 }
 
 body{
+  height: 100vh;
   background-image: linear-gradient(to right, #4B79A1, #283E51);
   display: flex;
   justify-content: center;
+  margin: 0;
 }
 .bestScore{
-  padding-top:23px;
+  padding-top:45px;
   & > p{
     margin-top: 13px;
   }
 }
 .player1, .player2{
   display: flex;
+  align-self: center;
 }
 
 .grid{
-  transition: width 2s;
   display: flex;
   flex-wrap: wrap;
+  transition: width 2s;
   width: 280px;
   height: 560px;
   margin: 0 20px;
@@ -63,9 +66,8 @@ body{
 }
 
 .control{
-
   margin-top: 20px;
-  &>p{
+  & > p{
     margin: 5px;
     text-align: center;
   }
@@ -105,14 +107,14 @@ body{
 }
 
 button{
-  transition: 1s;
+  transition: border 1s;
   width:90px;
+  margin: 20px 20px;
+  padding:10px;
   background-color: transparent;
   border-radius: 15px;
   font-size: 18px;
-  padding:10px;
   font-weight: 100;
-  margin: 20px 20px;
   &:focus {
     outline:0;
   }
