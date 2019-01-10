@@ -17,7 +17,7 @@ const matrixOfRotation = [
 let nbOfPlayer,fallTimerId,
   boardBestScore, bestScore,
   boardPlayer2,
-  player1Btn, player2Btn, startBtn,
+  player1Btn, player2Btn, startBtn, winner,
   gameStarted
 let grids = []
 const keysSets = [[32,37,39,40],[16,65,68,83]]
@@ -82,7 +82,6 @@ class Grid{
       endGame(this.player, parseFloat(this.score.innerHTML))
     } else if(!continueFall){
       this.nextShape()
-      console.log(this.filling);
     }
   }
 
@@ -92,7 +91,6 @@ class Grid{
 
   showShape(){
     this.shape.position.forEach(element => this.gridCollection[element].classList.add('shape'))
-
   }
 
   move(direction){
@@ -143,9 +141,11 @@ class Grid{
     //Add shape to the grid
     this.addShapeToGrid()
     //Check and remove lines if full
-    this.removeFullLine()
+    // this.removeFullLine()
+    //Make the lines to be removed blinking
+    this.blinkLine(this.removeFullLine())
     //Reset and redraw the updated grid
-    this.redraw()
+    // this.redraw()
   }
 
   addShapeToGrid(){
@@ -158,9 +158,11 @@ class Grid{
   }
 
   removeFullLine(){
+    const lineToBeRemoved = []
     //If a line is completed, remove the line from the grid.filling array
     for(let i = this.filling.length - 1; i >= 0; i--){
       if(this.filling[i].length === 10){
+        lineToBeRemoved.push(i)
         this.filling.splice(i,1)
         //And add an empty line at the top of the this.filling Array
         this.filling.unshift(new Array())
@@ -173,6 +175,27 @@ class Grid{
         i++
       }
     }
+    return lineToBeRemoved
+  }
+
+  blinkLine(lineToBeRemoved){
+    if(lineToBeRemoved.length === 0) return this.redraw()
+    console.log(lineToBeRemoved);
+    lineToBeRemoved.forEach(line => {
+      for(let i = 0; i < 10; i++){
+        this.gridCollection[String(line)+String(i)].classList.add('blink')
+        console.log(this.gridCollection);
+      }
+    })
+
+    let count = 0
+    setInterval(() => {
+      if(count === 1) {
+        this.gridCollection.forEach(element =>  element.classList.remove('blink'))
+        this.redraw()
+      }
+      count ++
+    },500)
   }
 
   addOneLine(){
@@ -193,7 +216,6 @@ class Grid{
 
     //Redraw grid
     this.redraw()
-    console.log(`player${this.player}`,this.filling);
   }
 
   increaseScore(){
@@ -203,10 +225,11 @@ class Grid{
 
   redraw(){
     //Remove all css class shape
-    this.gridCollection.forEach(element => element.classList.remove('shape'))
+    this.gridCollection.forEach(element => element.className = '')
+    // this.gridCollection.forEach(element => element.classList.remove('stack'))
     //Add css class shape according to grid.filling content
     this.filling.forEach(element => {
-      element.forEach(element => this.gridCollection[element].classList.add('shape'))
+      element.forEach(element => this.gridCollection[element].classList.add('stack'))
     })
   }
 
@@ -284,16 +307,18 @@ function endGame(player, score){
       localStorage.setItem('tetris-best-score', score)
       bestScore.innerHTML = score
     }
-    alert('you lost')
+    winner.innerHTML = 'Game Over'
   } else if(nbOfPlayer === 2){
-    alert(`Player ${player} lose`)
+    winner.innerHTML = `Player ${player === 1 ? 2 : 1} Lose`
   }
+  winner.classList.add('display-score')
 }
 
 function reinitiateGrid(){
   //Kill grid objects and reinitialise grids
   grids.forEach(element => element.destruct())
   grids = new Array()
+  winner.innerHTML = ''
 }
 
 function addLineToOpponent(player){
@@ -345,6 +370,7 @@ function init(){
   player2Btn = document.getElementById('2')
   startBtn = document.getElementById('start')
   bestScore = document.getElementById('best-score')
+  winner = document.querySelector('.winner')
 
   //Display user best score if any
   bestScore.innerHTML = localStorage.getItem('tetris-best-score') || 0
