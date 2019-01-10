@@ -46,7 +46,7 @@ class Grid{
       this.gridFrame.appendChild(cell)
     }
     this.gridCollection = Array.from(this.gridFrame.querySelectorAll('div'))
-
+    console.log(this.gridCollection)
     this.score = document.getElementById(`score${this.player}`)
     this.score.innerHTML = 0
     // document.addEventListener('keydown', this.handleKeydown)
@@ -160,9 +160,11 @@ class Grid{
   removeFullLine(){
     const lineToBeRemoved = []
     //If a line is completed, remove the line from the grid.filling array
+    this.filling.forEach((line, index) => {
+      if(line.length === 10) lineToBeRemoved.push(index)
+    })
     for(let i = this.filling.length - 1; i >= 0; i--){
       if(this.filling[i].length === 10){
-        lineToBeRemoved.push(i)
         this.filling.splice(i,1)
         //And add an empty line at the top of the this.filling Array
         this.filling.unshift(new Array())
@@ -180,11 +182,10 @@ class Grid{
 
   blinkLine(lineToBeRemoved){
     if(lineToBeRemoved.length === 0) return this.redraw()
-    console.log(lineToBeRemoved);
+    
     lineToBeRemoved.forEach(line => {
       for(let i = 0; i < 10; i++){
         this.gridCollection[String(line)+String(i)].classList.add('blink')
-        console.log(this.gridCollection);
       }
     })
 
@@ -272,9 +273,9 @@ class Shape{
   init(){
     const randomShape = Math.floor(Math.random() * shapesList.length)
     //careful here, do not do "this.position = shapeLi..." otherwise the shapesList will be updated as the shape moves.
-    this.name = shapesList[randomShape].name
+    this.name = shapesList[1].name
     this.color = shapesList[randomShape].color
-    this.position = shapesList[randomShape].coords.slice()
+    this.position = shapesList[1].coords.slice()
   }
 
   getNextPosition(direction){
