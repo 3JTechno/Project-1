@@ -26,17 +26,17 @@
 
 ![Tetris](https://user-images.githubusercontent.com/39668354/51074298-7ddb0080-1675-11e9-951f-ef79bae2d7b8.png)
 
-You can find a hosted version here ----> [3jtechno.github.io/Project-1](https://3jtechno.github.io/Project-1/)
+You can find a hosted version here ----> [3jtek.github.io/Project-1](https://3jtek.github.io/Project-1/)
 
 ---
 
 ### Overview
-This application is based on the classic Tetris game from 1984 programmed the Russian game designer Alexey Pajitnov.
+This application is based on the classic Tetris game from 1984 programmed by the Russian game designer Alexey Pajitnov.
 
 The player controls the movements of falling shapes and try to place them in order to create lines. Each line created will then disappear freeing space for the player. The goal is to create as many lines as possible without running out of space.
 
 A MultiPlayer option has also been implemented allowing two players to play simultaneously against each other on the same computer.
-The rules are the same than for the single player mode at the expection that,  each time a player clear a line, a new line is added to the opponent's grid enhancing the interaction and improving the competition between the two players.
+The rules are the same than for the single player mode at the expection that,  each time a player clears a line, a new line is added to the opponent's grid enhancing the interaction and improving the competition between the two players.
 
 ---
 
@@ -44,13 +44,13 @@ The rules are the same than for the single player mode at the expection that,  e
 
 The player can move the shapes to the left, right, down and rotate them using the following keys:
 
-1. One player mode:
+1. One Player mode:
   * ← ↓ → & "Space"
 
 
-2. MultiPlayer mode:
-  * Player1 (left): "A", "S", "D" & "L-Shift"
-  * Player2 (right): ← ↓ → & "Space"
+2. Multi-Player mode:
+  * Player 1 (left): "A", "S", "D" & "L-Shift"
+  * Player 2 (right): ← ↓ → & "Space"
 
 ---
 
@@ -66,7 +66,7 @@ The player can move the shapes to the left, right, down and rotate them using th
 
 ![screenshot - Moving Shape](https://user-images.githubusercontent.com/39668354/51074683-c1d00480-1679-11e9-86c4-ffaf1dd7d1ed.png)
 
-3. If a line is completed, it will blink for a short time before being removed from the grid moving down all the other lines above it. The player's score will also be incremented by the number of lines cleared.
+3. If a line is completed, it will blink for a short period of time before being removed from the grid moving down all the other lines above it. The player's score will also be incremented by the number of lines cleared.
 
 ![screenshot - Clear a Line](https://user-images.githubusercontent.com/39668354/51074691-d57b6b00-1679-11e9-963b-f872b89a736d.png)
 
@@ -74,7 +74,7 @@ The player can move the shapes to the left, right, down and rotate them using th
 
 ![screenshot - Game Over](https://user-images.githubusercontent.com/39668354/51074696-e330f080-1679-11e9-9788-bc2ae296972a.png)
 
-5. In two player's mode, each time a player clears a line, a new broken line will be added at the bottom of the opponent's grid.
+5. In two Player Mode, each time a player clears a line, a new broken line will be added at the bottom of the opponent's grid.
 
 ![screenshot - Adding a line to your opponent](https://user-images.githubusercontent.com/39668354/51074701-f8a61a80-1679-11e9-9da6-6f93546093a0.png)
 
@@ -82,9 +82,9 @@ The player can move the shapes to the left, right, down and rotate them using th
 
 ### Grid Solution
 
-Note: The extracts of code below have for only purpose to ease the understanding of the concepts used. They in any case do reflect precisely the actual code used in this application.
+Note: The extracts of code below have for only purpose to ease the understanding of the concepts used. They do not reflect precisely the actual code used in this application.
 
-The whole grid is composed of 200 of divs flex-wrapped into the main grid body (top-left(0) to bottom-right (199)).
+The whole grid is composed of 200 divs flex-wrapped into the main grid body (top-left(0) to bottom-right (199)).
 
 A filling array is also created to record the stack of bricks created by all the shapes that reached the bottom.
 ```
@@ -125,7 +125,7 @@ Once a shape reach the bottom of the grid and cannot move anymore, its last coor
 shape.forEach(element => grid.filling.push(element)) //Here we actually do a slightly more complex code to calculate the line (grid.filling[line]) to which the element needs to be added to.
 ```
 
-Each time the grid array receives a new shape, we check if one line has been complete and remove it or them before redrawing the grid.
+Each time the grid array receives a new shape, we check if one line has been completed and remove it before redrawing the grid.
 
 ```
 lineToRemove = []
@@ -147,7 +147,7 @@ class Game
 document.addEventListener('DOMContentLoaded', () => new Game)
 ```
 
-The Game class control the main game flow until the player actually starts playing (retrieve best score from local repo, switch between player mode, display winner...).
+The Game class control the main game flow until the player actually starts playing (retrieves best score from local repo, switches between player mode, displays winner...).
 
 When the Start button is clicked, the Game object creates 1 or 2 Grid object(s) that themselves manage everything that happens within the grid (create shape, move shape, fill the grid...).
 
@@ -165,7 +165,7 @@ However, in several case an object needs to talk to his parent, this is where ca
 
 * Clear lines: multiple lines to clear, especially when not consecutive (3 full lines separated by 1 none full line), increased the difficulty of the code. Each line needed to be removed one by one recalculating the new mapping of the grid each time to make sure that right sequence is kept.
 
-* Player Mode: In two player mode, both player couldn't hold a key at the same time which is a issue to move the shape down quickly. This is due to the event event listener not keeping track of a key down if another key is pressed. To overcome this problem,  an array of 'key down' has been created to store all the current key being pressed down. The 'keydown' event listener feeds the array while another event listener 'keyup' remove the key from it.
+* Player Mode: In two player mode, both player couldn't hold a key at the same time which is an issue to move the shape down quickly. This is due to the event event listener not keeping track of a key down if another key is pressed. To overcome this problem,  an array of 'key pressed' has been created to store all the current key being pressed down. The 'keydown' event listener feeds the array while another event listener 'keyup' remove the key from it.
 
 ```
 if(e.type === 'keydown'){
@@ -180,7 +180,7 @@ this.arrayKeyPressed.forEach(key => this.handleKeydown(key))
 
 ### Wins
 
-Using classes really help the code to be more clear and isolate the objects form each other.
+Using classes really help the code to be clearer and isolate the objects form each other.
 Any change made to player 1 will automatically be reflected on player 2 since both objects are form the same class Grid.
 
 
@@ -188,12 +188,12 @@ Any change made to player 1 will automatically be reflected on player 2 since bo
 
 ### Future Enhancements
 
-1. Enhancement: the solution to keep track of the grid is too complex. The  grid.filling array which contains all indexes of the divs forming the stack could be deleted since all the information exist already in the grid.collection which contains all divs.
+* The solution to keep track of the grid is too complex. The  grid.filling array which contains all indexes of the divs forming the stack could be deleted since all the information exist already in the grid.collection which contains all divs.
+
+* The 2 Player responsiveness of the keys pressed is sometimes poor. This is probably due to the solution implemented to allow 2 keys to be pressed down at the same time (to be reviewed).
 
 ### Future Features
 
-1. Increasing Speed: every nb of line to create some kind of difficulty for the player as he is clearing more and more lines.
+* Increasing Speed: every nb of line to create some kind of difficulty for the player as he is clearing more and more lines.
 
-2. Display Upcoming Element: this will allow the player to make smart choices about where to place the current shape knowing what shape is coming next.
-
-3. 2 Player Usuability: somehow, in 2 Player Mode, the responsiveness of the keys pressed is sometimes poor. This is probably due to the solution implemented to allow 2 keys to be pressed down at the same time (to be reviewed).
+* Display Upcoming Element: this will allow the player to make smart choices about where to place the current shape knowing what shape is coming next.
