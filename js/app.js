@@ -300,8 +300,10 @@ class Game{
     this.bestScore = document.getElementById('best-score')
     this.winner = document.querySelector('.winner')
     this.addLineToOpponent = this.addLineToOpponent.bind(this)
+
     this.switchPlayer = this.switchPlayer.bind(this)
     this.startGame = this.startGame.bind(this)
+    this.endGame = this.endGame.bind(this)
 
     this.init()
   }
@@ -354,8 +356,8 @@ class Game{
   endGame(player, score){
     clearInterval(this.fallTimerId)
     if(this.nbOfPlayer === 1){
-      if(this.score > this.bestScore.innerHTML){
-        localStorage.setItem('tetris-best-score', this.score)
+      if(score > this.bestScore.innerHTML){
+        localStorage.setItem('tetris-best-score', score)
         this.bestScore.innerHTML = score
       }
       this.winner.innerHTML = 'Game Over'
