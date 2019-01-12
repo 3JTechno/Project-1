@@ -20,11 +20,15 @@
 2. Run ```scss scss/style.scss:css/style.css --watch --style compressed```
 1. Open the `index.html` in your browser of choice
 
+
+
 ## Game - MultiPlayer Tetris
 
 ![Tetris](https://user-images.githubusercontent.com/39668354/51074298-7ddb0080-1675-11e9-951f-ef79bae2d7b8.png)
 
 You can find a hosted version here ----> [3jtechno.github.io/Project-1](https://3jtechno.github.io/Project-1/)
+
+---
 
 ### Game overview
 This game is based on the classic Tetris game from 1984 programmed the Russian game designer Alexey Pajitnov.
@@ -36,39 +40,46 @@ On top of the single player mode, a MultiPlayer option has been added allowing t
 The rules are the same than the single player mode (the player that is running out of space loses).
 Additionally, each time a player clear a line, a new line will be added to his opponent's grid enhancing the interaction and improving the competition feeling between the two players.
 
+---
+
 ### Controls
 
 The player can move the shape left, right, down and rotate them using the following keys:
 
 1. One player mode:
-- ← ↓ → & "Space"
+  * ← ↓ → & "Space"
 
-2. MultiPlayer mode
-- Player1 (left): "A", "S", "D" & "L-Shift"
-- Player2 (right): ← ↓ → & "Space"
+
+2. MultiPlayer mode:
+  * Player1 (left): "A", "S", "D" & "L-Shift"
+  * Player2 (right): ← ↓ → & "Space"
+
+---
 
 ### Game Instructions
 1. The game begins by default on One Player mode. The user can switch between mode by clicking on the player selection buttons "1" & "2". Note that the best score will also being displayed on the left side (Player 1 only).
 
-![screenshot - One Player Mode](https://user-images.githubusercontent.com/39668354/51030639-f9fc1800-1591-11e9-9000-07125c45f72b.png)
+![screenshot - One Player Mode](https://user-images.githubusercontent.com/39668354/51074602-06a76b80-1679-11e9-9fa7-0de1ad5876fb.png)
 
-![screenshot - Two Players Mode](https://user-images.githubusercontent.com/39668354/51030669-1009d880-1592-11e9-9d23-184848f129c4.png)
+![screenshot - Two Players Mode](https://user-images.githubusercontent.com/39668354/51074718-28552280-167a-11e9-88fd-2c605eac6afe.png)
 
 2. The player(s) will then use the appropriate commands to move the shape and place it into the desired position at the bottom of the grid.
 
-![screenshot - Moving Shape](https://user-images.githubusercontent.com/39668354/51030669-1009d880-1592-11e9-9d23-184848f129c4.png)
+![screenshot - Moving Shape](https://user-images.githubusercontent.com/39668354/51074683-c1d00480-1679-11e9-86c4-ffaf1dd7d1ed.png)
 
 3. If a line is completed, it will blink for a short time before being removed from the grid moving down all the other lines above. The player's score will also be incremented by the number of lines cleared.
 
-![screenshot - Clear a Line](https://user-images.githubusercontent.com/39668354/51031226-cfab5a00-1593-11e9-9c90-b3f3aba7bc58.png)
+![screenshot - Clear a Line](https://user-images.githubusercontent.com/39668354/51074691-d57b6b00-1679-11e9-963b-f872b89a736d.png)
 
 4. If the player's grid is full and shape cannot fall anymore, the game finishes. If the player's beats his best score, best score will be updated accordingly.
 
-![screenshot - Game Over](https://user-images.githubusercontent.com/39668354/51031142-8c50eb80-1593-11e9-8911-d1bbb5eeecb9.png)
+![screenshot - Game Over](https://user-images.githubusercontent.com/39668354/51074696-e330f080-1679-11e9-9788-bc2ae296972a.png)
 
 5. In two player's mode, each time a player clear a line, a new line will be added at the bottom of the opponent's grid.
 
-![screenshot - Adding a line to your opponent](https://user-images.githubusercontent.com/39668354/51030805-6bd46180-1592-11e9-871e-c356d9402261.png)
+![screenshot - Adding a line to your opponent](https://user-images.githubusercontent.com/39668354/51074701-f8a61a80-1679-11e9-9da6-6f93546093a0.png)
+
+---
 
 ## Grid Solution
 
@@ -122,6 +133,8 @@ lineToRemove = []
 grid.filling.forEach((lineElements, lineNumber) => if(lineElements.length === 10) lineToRemove.push(lineNumber))
 ```
 
+---
+
 ### Architecture
 
 The codebase is composed of 3 classes:
@@ -146,6 +159,7 @@ The creation of classes makes things relatively easy since each can only interac
 However, in several case an object needs to talk to his parent, this is where callbacks are used.
 In the case where a line is cleared in the 2P mode, the Grid object needs to tell his parent the Game object to add a line to the other Grid object.
 
+---
 
 ### Challenges
 
@@ -155,9 +169,13 @@ Clear lines: Multiple lines to clear especially when not consecutive (3 full lin
 
 2 Player Mode: In two player mode, both player cannot hold a key at the same time (i.e. key "down" to accelerate the fall of a shape). This is due to the event event listener not keeping track of a key down if another key is pushed. An array of current key down has been created to store all the current key being pressed down. It is feeded by the event listener keydown and it is also unfeeded by the keyup event listener.
 
+---
+
 ### Wins
 
 Using classes really help the code to be more clear and isolate the object form each other. Moreover, any change I would do to player 1 will automatically be reflected on player 2 since both objects are form the same class Grid.
+
+---
 
 ## Future features an enhancement
 
